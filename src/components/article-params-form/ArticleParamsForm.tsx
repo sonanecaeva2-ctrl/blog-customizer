@@ -14,20 +14,19 @@ import {
 	contentWidthArr,
 	defaultArticleState,
 	ArticleStateType,
-	OptionType,
 } from 'src/constants/articleProps';
 
 import styles from './ArticleParamsForm.module.scss';
 
 export const ArticleParamsForm = ({
-	currentState,
+	currentArticleState,
 	onApply,
 }: {
-	currentState: ArticleStateType;
+	currentArticleState: ArticleStateType;
 	onApply: (state: ArticleStateType) => void;
 }) => {
 	const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-	const [formState, setFormState] = useState<ArticleStateType>(currentState);
+	const [formState, setFormState] = useState<ArticleStateType>(currentArticleState);
 
 	const sidebarRef = useRef<HTMLDivElement | null>(null);
 	useEffect(() => {
@@ -49,28 +48,16 @@ export const ArticleParamsForm = ({
 		};
 	}, [isSidebarOpen]);
 
-	const handleFontFamilyChange = (value: OptionType) => {
-		setFormState({ ...formState, fontFamilyOption: value });
-	};
-
-	const handleFontSizeChange = (value: OptionType) => {
-		setFormState({ ...formState, fontSizeOption: value });
-	};
-
-	const handleFontColorChange = (value: OptionType) => {
-		setFormState({ ...formState, fontColor: value });
-	};
-
-	const handleBackgroundColorChange = (value: OptionType) => {
-		setFormState({ ...formState, backgroundColor: value });
-	};
-
-	const handleContentWidthChange = (value: OptionType) => {
-		setFormState({ ...formState, contentWidth: value });
+	const handleFieldChange = <K extends keyof ArticleStateType>(
+		field: K,
+		value: ArticleStateType[K]
+	) => {
+		setFormState((prev) => ({ ...prev, [field]: value }));
 	};
 
 	const handleReset = () => {
 		setFormState(defaultArticleState);
+		onApply(defaultArticleState);
 	};
 
 	const handleApply = (event: React.FormEvent) => {
@@ -82,16 +69,22 @@ export const ArticleParamsForm = ({
 		<>
 			<ArrowButton
 				isOpen={isSidebarOpen}
-				onClick={() => {
+				onClick={(event) => {
+					event.stopPropagation();
 					setIsSidebarOpen(!isSidebarOpen);
 				}}
 			/>
 			<aside
+				ref={sidebarRef}
+				onClick={(event) => event.stopPropagation()}
 				className={clsx(
 					styles.container,
 					isSidebarOpen && styles.container_open
 				)}>
-				<form className={styles.form} onSubmit={handleApply}>
+				<form
+					className={styles.form}
+					onSubmit={handleApply}
+					onReset={handleReset}>
 					<Text as='h2' size={31} weight={800} uppercase>
 						Задайте параметры
 					</Text>
@@ -99,36 +92,37 @@ export const ArticleParamsForm = ({
 						title='Шрифт'
 						options={fontFamilyOptions}
 						selected={formState.fontFamilyOption}
-						onChange={handleFontFamilyChange}></Select>
+						onChange={(value) => handleFieldChange('fontFamilyOption', value)}
+					/>
 					<RadioGroup
 						name='fontSize'
 						title='Размер шрифта'
 						options={fontSizeOptions}
 						selected={formState.fontSizeOption}
-						onChange={handleFontSizeChange}></RadioGroup>
+						onChange={(value) =>
+							handleFieldChange('fontSizeOption', value)
+						}></RadioGroup>
 					<Select
 						title='Цвет шрифта'
 						options={fontColors}
 						selected={formState.fontColor}
-						onChange={handleFontColorChange}></Select>
+						onChange={(value) => handleFieldChange('fontColor', value)}
+					/>
 					<Separator />
 					<Select
 						title='Цвет фона'
 						options={backgroundColors}
 						selected={formState.backgroundColor}
-						onChange={handleBackgroundColorChange}></Select>
+						onChange={(value) => handleFieldChange('backgroundColor', value)}
+					/>
 					<Select
 						title='Ширина контента'
 						options={contentWidthArr}
 						selected={formState.contentWidth}
-						onChange={handleContentWidthChange}></Select>
+						onChange={(value) => handleFieldChange('contentWidth', value)}
+					/>
 					<div className={styles.bottomContainer}>
-						<Button
-							title='Сбросить'
-							htmlType='reset'
-							type='clear'
-							onClick={handleReset}
-						/>
+						<Button title='Сбросить' type='clear' onClick={handleReset} />
 						<Button title='Применить' htmlType='submit' type='apply' />
 					</div>
 				</form>
