@@ -1,3 +1,5 @@
+https://github.com/sonanecaeva2-ctrl/blog-customizer
+
 # Проектная работа: Вёрстка проекта
 
 ## Шаг первый. Изучаем имеющиеся компоненты
